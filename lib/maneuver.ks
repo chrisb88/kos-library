@@ -12,11 +12,12 @@ global function executeManeuver {
     local mnv is node(mList[0], mList[1], mList[2], mList[3]).
     addManeuverToFlightPlan(mnv).
     local startTime is calculateManeuverStartTime(mnv).
+    // todo reduce engine thrust for verly low burn times
 
     debug("Maneuver start time is " + timeSpan(startTime - time:seconds):full + " from now (" + timeStamp(startTime):full + ")").
 
-    warpTo(startTime -15).
-    wait until time:seconds > startTime - 10.
+    warpTo(startTime - 120).
+//    wait until time:seconds > startTime - 10.
     lockSteeringAtManeuverTarget(mnv).
     wait until time:seconds > startTime.
     executeBurn(mnv).
