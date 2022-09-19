@@ -12,6 +12,11 @@ runoncepath("0:/lib/math").
 global function circularize {
     parameter altitude, currentApsis, maxAllowedAltitudeDeviation.
 
+    if currentApsis <> "apoapsis" and currentApsis <> "periapsis" {
+        warning("Invalid parameter: " + currentApsis).
+        set currentApsis to "apoapsis".
+    }
+
     local bounds is getBounds(altitude, maxAllowedAltitudeDeviation).
 
     status("Circularizing to " + altitude + "m... [" + bounds[0] + "..." + bounds[1] + "]").
