@@ -4,6 +4,9 @@
 runoncepath("0:/lib/staging").
 runoncepath("0:/lib/status").
 
+local maxBurnTimeTarget is 3.
+local throttleDownAtDeltaV is 10.
+
 global function executeManeuver {
     parameter mList.
 
@@ -11,9 +14,15 @@ global function executeManeuver {
 
     local mnv is node(mList[0], mList[1], mList[2], mList[3]).
     addManeuverToFlightPlan(mnv).
-    local startTime is calculateManeuverStartTime(mnv).
-    // todo reduce engine thrust for verly low burn times
 
+    setEngineThrustLimit(100).
+    local burnTime is calculateManeuverBurnTime(mnv).
+    if burnTime < maxBurnTimeTarget {
+        local factor is maxBurnTimeTarget / burnTime.
+        setEngineThrustLimit(100 / factor).
+    }
+
+    local startTime is calculateManeuverStartTime(mnv).
     debug("Maneuver start time is " + timeSpan(startTime - time:seconds):full + " from now (" + timeStamp(startTime):full + ")").
 
     warpTo(startTime - 120).
@@ -24,6 +33,7 @@ global function executeManeuver {
     removeManeuverFromFlightPlan(mnv).
 
     unlock throttle.
+    setEngineThrustLimit(100).
 }
 
 global function addManeuverToFlightPlan {
@@ -41,10 +51,10 @@ global function removeManeuverFromFlightPlan {
 local function calculateManeuverStartTime {
     parameter mnv.
 
-    return time:seconds + mnv:eta - maneuverBurnTime(mnv) / 2.
+    return time:seconds + mnv:eta - calculateManeuverBurnTime(mnv) / 2.
 }
 
-local function maneuverBurnTime {
+local function calculateManeuverBurnTime {
     parameter mnv.
 
     local dV is mnv:deltaV:mag.
@@ -86,6 +96,36 @@ local function maneuverBurnTime {
     return t.
 }
 
+local function setEngineThrustLimit {
+    parameter limit.
+    debug("Setting thrust limit to " + limit).
+
+    local myEngines is list().
+
+    list engines in myEngines.
+    for en in myEngines {
+        if en:ignition and not en:flameout {
+            set en:thrustlimit to limit.
+            unset oldThrust. // prevent to do any staging if we are in a burn and reduce thrust too much, see staging.ks
+        }
+    }
+}
+
+local function getEngineThrustLimit {
+    local limit is 0.
+    local count is 0.
+    local myEngines is list().
+    list engines in myEngines.
+    for en in myEngines {
+        if en:ignition and not en:flameout {
+            set limit to limit + en:thrustlimit.
+            set count to count + 1.
+        }
+    }
+
+    return limit / count.
+}
+
 local function lockSteeringAtManeuverTarget {
     parameter mnv.
 
@@ -99,7 +139,11 @@ local function executeBurn {
     lock throttle to 1.
     until isManeuverComplete(mnv) {
         doAutoStage().
-        if mnv:deltaV:mag < 10 {
+
+        local thrustLimit is getEngineThrustLimit().
+        local maxDeltaV is throttleDownAtDeltaV * thrustLimit / 100.
+
+        if mnv:deltaV:mag < maxDeltaV {
             local thr is -0.022449 + 0.0510204 * mnv:deltaV:mag.
             set thr to choose 0.1 if thr < 0.1 else thr.
             lock throttle to thr.
