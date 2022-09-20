@@ -3,7 +3,7 @@
 // Parameter:
 // - altitude: in m
 // - apsis to start circularizing (apoapsis, periapsis)
-// - allowed altitude deviation in percent
+// - allowed altitude deviation in percent [0...1]
 @LAZYGLOBAL off.
 runoncepath("0:/lib/status").
 runoncepath("0:/lib/maneuver").

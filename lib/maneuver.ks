@@ -93,13 +93,17 @@ local function lockSteeringAtManeuverTarget {
 }
 
 local function executeBurn {
-    // todo lower throttle near the end of burn
     parameter mnv.
 
     debug("Executing burn...").
     lock throttle to 1.
     until isManeuverComplete(mnv) {
         doAutoStage().
+        if mnv:deltaV:mag < 10 {
+            local thr is -0.022449 + 0.0510204 * mnv:deltaV:mag.
+            set thr to choose 0.1 if thr < 0.1 else thr.
+            lock throttle to thr.
+        }
     }
     lock throttle to 0.
     unlock steering.
@@ -108,15 +112,13 @@ local function executeBurn {
 local function isManeuverComplete {
     parameter mnv.
 
-    if not(defined originalVector) or originalVector = -1 {
+    if not(defined originalVector) {
         declare global originalVector to mnv:burnVector.
     }
 
     if vang(originalVector, mnv:burnVector) > 90 {
-        // Delete originalVector
-        declare global originalVector to -1.
-
         debug("Maneuver is complete").
+        unset originalVector.
 
         return true.
     }
