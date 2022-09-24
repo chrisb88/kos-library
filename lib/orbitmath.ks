@@ -68,7 +68,7 @@ global function calculateDeltaVForHohmannTransfer {
     debug("Speed at apoapsis: " + round(vTargetApsis, 2)).
 
     local vD is vTargetApsis - vCurrentApsis.
-    status("Need " + round(vD, 2) + " m/s deltaV to change orbit").
+    info("Need " + round(vD, 2) + " m/s deltaV to change orbit").
 
     return vD.
 }

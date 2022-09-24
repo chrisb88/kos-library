@@ -20,7 +20,7 @@ global function circularize {
 
     local bounds is getBounds(altitude, maxAllowedAltitudeDeviation).
 
-    status("Circularizing to " + altitude + "m... [" + bounds[0] + "..." + bounds[1] + "]").
+    status("Circularizing above " + orbit:body:name + " at " + altitude + "m... [" + bounds[0] + "..." + bounds[1] + "]").
 
     coastToSpace().
 
@@ -108,7 +108,7 @@ function doCalculateDeltaVForCircularOrbit {
     debug("Speed at target apsis: " + round(vTargetApsis, 2)).
 
     local vD is vTargetApsis - vCurrentApsis.
-    status("Need " + round(vD, 2) + " m/s deltaV to change orbit").
+    info("Need " + round(vD, 2) + " m/s deltaV to change orbit").
 
     return vD.
 }

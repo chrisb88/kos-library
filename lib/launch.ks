@@ -26,6 +26,7 @@ global function launch {
 local function doLaunch {
     debug("Launching").
 
+    // todo reduce throttle
     lock throttle to 1.
     doSafeStage().
 
