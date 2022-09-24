@@ -73,6 +73,12 @@ local function calculateManeuverBurnTime {
         }
     }
 
+    if isp = 0 {
+        warning("ISP is zero.").
+
+        return 2^64.
+    }
+
     debug("Combined ISP: " + round(isp, 2)).
     debug("Ships mass: " + round(m0, 2)).
     debug("Available thrust: " + round(F, 2)).
@@ -123,6 +129,11 @@ local function getEngineThrustLimit {
             set limit to limit + en:thrustlimit.
             set count to count + 1.
         }
+    }
+
+    if count = 0 {
+        warning("No active engines.").
+        return 0.
     }
 
     return limit / count.
