@@ -40,7 +40,7 @@ local function performTransfer {
     local mnv is node(time:seconds + td, 0, 0, transferDeltaV).
     addManeuverToFlightPlan(mnv).
 
-    if not mnv:hasNextPatch {
+    if not mnv:orbit:hasNextPatch {
         error("Calculation error: No encounter in orbit.").
 
         return.
