@@ -61,10 +61,27 @@ local function performTransferCorrection {
 local function calculateCorrectionBurn {
     parameter timeForManeuver, targetAltitude.
 
-    local deltaV is list(0).
-    set deltaV to improveConverge(deltaV, protectFromPositive(distanceApoapsisFromTargetAltitudeScore@:bind(timeForManeuver):bind(targetAltitude))).
+    local deltaVRetro is list(0).
+    local deltaVPro is list(0).
+    set deltaVRetro to improveConverge(deltaVRetro, protectFromPositive(distanceApoapsisFromTargetAltitudeScore@:bind(timeForManeuver):bind(targetAltitude))).
+    set deltaVPro to improveConverge(deltaVPro, protectFromNegative(distanceApoapsisFromTargetAltitudeScore@:bind(timeForManeuver):bind(targetAltitude))).
 
-    return list(timeForManeuver, 0, 0, deltaV[0]).
+    debug("DeltaV retrogade burn: " + deltaVRetro[0]).
+    debug("DeltaV prograde burn: " + deltaVPro[0]).
+
+    local deltaV is 0.
+    if deltaVRetro[0] <> 0 and abs(deltaVRetro[0]) < abs(deltaVPro[0]) {
+        set deltaV to deltaVRetro[0].
+    } else {
+        set deltaV to deltaVPro[0].
+    }
+
+    debug("DeltaV: " + deltaV).
+    if deltaV = 0 {
+        error("DeltaV is zero!").
+    }
+
+    return list(timeForManeuver, 0, 0, deltaV).
 }
 
 local function distanceApoapsisFromTargetAltitudeScore {
