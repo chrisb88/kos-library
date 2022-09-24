@@ -20,3 +20,15 @@ global function getBounds {
 
     return list(targetLower, targetUpper).
 }
+
+global function rad2deg {
+    parameter rads.
+
+    return rads * (180 / constant:pi).
+}
+
+global function normalizeAngle {
+    parameter angle.
+
+    return angle - 360 * floor(angle / 360).
+}

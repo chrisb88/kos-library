@@ -57,6 +57,8 @@ local function calculateManeuverStartTime {
 local function calculateManeuverBurnTime {
     parameter mnv.
 
+    debug("Calculating burn time:").
+
     local dV is mnv:deltaV:mag.
     local g0 is constant:g0. // 9.80665, always the gravity of earth, as this is used for isp
     local isp is 0.

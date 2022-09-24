@@ -19,6 +19,12 @@ global function warning {
     _log(msg, 1).
 }
 
+global function info {
+    parameter msg.
+
+    _log(msg, 2).
+}
+
 global function status {
     parameter msg.
 

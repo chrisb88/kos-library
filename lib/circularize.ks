@@ -8,6 +8,7 @@
 runoncepath("0:/lib/status").
 runoncepath("0:/lib/maneuver").
 runoncepath("0:/lib/math").
+runoncepath("0:/lib/orbitmath").
 
 global function circularize {
     parameter altitude, currentApsis, maxAllowedAltitudeDeviation.
@@ -110,13 +111,4 @@ function doCalculateDeltaVForCircularOrbit {
     status("Need " + round(vD, 2) + " m/s deltaV to change orbit").
 
     return vD.
-}
-
-function calculateOrbitSpeed {
-    parameter r, a.
-
-    // vis-viva equation
-    // v^2 = Mu * (2/r - 1/a)
-
-    return sqrt(body:mu * (2 / r - 1 / a)).
 }
