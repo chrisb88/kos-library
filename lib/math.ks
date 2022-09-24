@@ -32,3 +32,23 @@ global function normalizeAngle {
 
     return angle - 360 * floor(angle / 360).
 }
+
+global function ternarySearch {
+    parameter f, left, right, absolutePrecision.
+
+    until false {
+    // left and right are the current bounds; the maximum is between them
+        if abs(right - left) < absolutePrecision {
+            return (left + right) / 2.
+        }
+
+        local leftThird is left + (right - left) / 3.
+        local rightThird is right - (right - left) / 3.
+
+        if f(leftThird) < f(rightThird) {
+            set left to leftThird.
+        } else {
+            set right to rightThird.
+        }
+    }
+}
