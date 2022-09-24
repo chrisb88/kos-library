@@ -9,27 +9,33 @@ runoncepath("0:/lib/status").
 runoncepath("0:/lib/maneuver").
 runoncepath("0:/lib/hillclimbing").
 
-parameter targetAltitude is 100000.
+parameter targetAltitude is 100000,
+    targetBody is Mun.
 
 local function main {
-    parameter targetAltitude.
+    parameter targetAltitude, targetBody.
 
-    performTransfer().
+    // todo correct the node before the burn to be more efficient
+    performTransfer(targetBody).
     performTransferCorrection(targetAltitude).
-    performTransferInjection().
+    performTransferInjection(targetBody).
 }
 
 local function performTransfer {
-    status("Begin transfer to mun...").
+    parameter targetBody.
+
+    status("Begin transfer to " + targetBody:name + "...").
     info("Calculating transfer phase angle:").
+    local parentBody is targetBody:orbit:body.
+    debug("Parent body: " + parentBody:name).
     local transferPeriapsis is orbit:semiMajorAxis.
-    local transferApoapsis is Mun:altitude + Kerbin:radius.
+    local transferApoapsis is targetBody:altitude + parentBody:radius.
     local phaseAngleMun is calculatePhaseAngle(transferPeriapsis, transferApoapsis).
     local transferDeltaV is calculateDeltaVForHohmannTransfer(transferPeriapsis, transferApoapsis).
 
     info("Target phase angle: " + phaseAngleMun).
 
-    local currentAngle is getPhaseAngle(ship:orbit, Mun:obt).
+    local currentAngle is getPhaseAngle(ship:orbit, targetBody:orbit).
     debug("Current angle: " + currentAngle).
     local deltaAngle is normalizeAngle(currentAngle - phaseAngleMun).
     debug("deltaAngle: " + deltaAngle).
@@ -63,6 +69,7 @@ local function calculateCorrectionBurn {
 
     local deltaVRetro is list(0).
     local deltaVPro is list(0).
+    // fixme there is too often 0 calculated when it actually is not
     set deltaVRetro to improveConverge(deltaVRetro, protectFromPositive(distanceApoapsisFromTargetAltitudeScore@:bind(timeForManeuver):bind(targetAltitude))).
     set deltaVPro to improveConverge(deltaVPro, protectFromNegative(distanceApoapsisFromTargetAltitudeScore@:bind(timeForManeuver):bind(targetAltitude))).
 
@@ -99,11 +106,13 @@ local function distanceApoapsisFromTargetAltitudeScore {
 }
 
 local function performTransferInjection {
-    status("Transfering to mun...").
+    parameter targetBody.
+
+    status("Transfering to " + targetBody:name + "...").
 
     warpTo(time:seconds + orbit:nextPatchEta - 5).
-    wait until orbit:body = Mun.
-    status("Arrived at mun.").
+    wait until orbit:body = targetBody.
+    status("Arrived at " + targetBody:name + ".").
 }
 
-main(targetAltitude).
+main(targetAltitude, targetBody).
