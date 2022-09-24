@@ -1,4 +1,4 @@
-// ------- To Mun
+// ------- Mun Transfer
 // Performs a Hohmann transfer to the mun.
 // Parameter:
 // - targetAltitude: in m above the mun
@@ -7,11 +7,22 @@ runoncepath("0:/lib/orbitmath").
 runoncepath("0:/lib/status").
 runoncepath("0:/lib/maneuver").
 runoncepath("0:/lib/hillclimbing").
+runoncepath("0:/lib/circularize").
 
 parameter targetAltitude is 100000.
 
+local function main {
+    parameter targetAltitude.
+
+    performTransfer().
+    performTransferCorrection(targetAltitude).
+    performTransferInjection().
+    circularize(targetAltitude, "periapsis", 0.025).
+}
+
 local function performTransfer {
-    status("Calculating transfer phase angle...").
+    status("Begin transfer to mun...").
+    status("Calculating transfer phase angle:").
     local transferPeriapsis is orbit:semiMajorAxis.
     local transferApoapsis is Mun:altitude + Kerbin:radius.
     local phaseAngleMun is calculatePhaseAngle(transferPeriapsis, transferApoapsis).
@@ -41,7 +52,7 @@ local function performTransfer {
 
 local function performTransferCorrection {
     parameter targetAltitude.
-    status("Transfer phase...").
+    status("Transfer correction...").
 
     local timeForManeuver is round(time:seconds + 2 * 60).
     local transfer is calculateCorrectionBurn(timeForManeuver, targetAltitude).
@@ -71,5 +82,12 @@ local function distanceApoapsisFromTargetAltitudeScore {
     return result.
 }
 
-//performTransfer().
-//performTransferCorrection(targetAltitude).
+local function performTransferInjection {
+    status("Transfering to mun...").
+
+    warpTo(time:seconds + orbit:nextPatchEta - 5).
+    wait until orbit:body = Mun.
+    status("Arrived at mun.").
+}
+
+main(targetAltitude).
