@@ -9,9 +9,11 @@ runoncepath("0:/lib/status").
 parameter launchAltitude is 100000,
         targetAltitude is 20000.
 
-status("Starting to the mun!").
+set target to Mun.
+local targetName is target:name.
+status("Starting to " + targetName + "!").
 runpath("0:/launch", launchAltitude).
 runpath("0:/circularize", launchAltitude).
 runpath("0:/mun-transfer", targetAltitude).
-runpath("0:/circularize", targetAltitude, "periapsis").
-status("We have arrived at the mun!").
+runpath("0:/circularize", targetAltitude, "periapsis", 0.05).
+status("We have arrived at " + targetName + "!").
