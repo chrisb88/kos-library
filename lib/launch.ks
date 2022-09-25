@@ -26,8 +26,7 @@ global function launch {
 local function doLaunch {
     debug("Launching").
 
-    // todo reduce throttle
-    lock throttle to 1.
+    set throttle to 1.
     doSafeStage().
 
     until ship:maxthrust > 0 {
@@ -50,11 +49,14 @@ local function doAscent {
 
     lock targetPitch to 88.963 - 1.03287 * alt:radar^0.409511.
     lock steering to heading(targetDirection, targetPitch).
+
+    // Reduce throttle on ascend until 50km altitude. It doens't save that much fuel though
+    lock throttle to choose 1 if ship:altitude > 50000 else 6 - 0.1 * ship:orbit:eta:apoapsis.
 }
 
 local function doShutdown {
     debug("Shutdown engines").
 
-    lock throttle to 0.
+    set throttle to 0.
     lock steering to prograde.
 }
